@@ -1,0 +1,15 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+
+# Build output
+dist/
+.vercel/
+
+# Environment files
+backend/.env
+frontend/.env
+
+# System files
+.DS_Store
+Thumbs.db
