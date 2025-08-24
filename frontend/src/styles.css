@@ -19,3 +19,25 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; background:var(
 .add-plant-form{margin-top:18px;background:var(--card);padding:12px;border-radius:12px;border:1px solid #e6e9ee}
 .add-plant-form input, .add-plant-form select { width:100%; padding:8px; margin-bottom:8px; border-radius:8px; border:1px solid #e2e8f0 }
 .add-plant-form button { background:var(--accent); color:white; padding:8px 12px; border-radius:8px; border:none; cursor:pointer }
+/* modal (Header.jsx) */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:50; }
+.modal-card { background:#fff; width: 100%; max-width: 360px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.2); overflow:hidden; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid #eee; }
+.modal-body { padding:16px; display:flex; flex-direction:column; gap:10px; }
+.close { background:none; border:none; font-size:20px; cursor:pointer; }
+.input { padding:10px; border:1px solid #ccc; border-radius:8px; }
+.btn { padding:10px 14px; border:none; border-radius:8px; background:#2d6a4f; color:#fff; cursor:pointer; font-weight:600; }
+.btn:hover { background:#1b4332; }
+.btn-danger { background:#b00020; }
+.link { background:none; border:none; color:#2d6a4f; text-decoration:underline; cursor:pointer; padding:0; }
+.logo { font-size: 1.6rem; color:#2d6a4f; }
+.header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.auth-actions { display:flex; align-items:center; gap:10px; }
+.welcome { font-weight:600; }
+.container { padding:20px; max-width:1200px; margin:0 auto; }
+.content { }
+.section-title { margin-top:24px; margin-bottom:12px; color:#2d6a4f; }
+.info { color:#2d6a4f; }
+.error { color:#b00020; }
+.small { font-size: 0.9rem; }
+.thumb { width:100%; height:120px; background:#eaf6ee; display:flex; align-items:center; justify-content:center; border-radius:10px; margin-bottom:8px; font-size:2rem; }

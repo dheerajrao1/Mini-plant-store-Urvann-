@@ -1,66 +1,95 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { AuthProvider } from "./components/AuthProviderWrapper.jsx"; // small wrapper (file below)
-import Header from "./components/Header.jsx";
-import PlantGrid from "./components/PlantGrid.jsx";
-import Filters from "./components/Filters.jsx";
-import AddPlant from "./components/AddPlant.jsx";
-import { fetchPlants, addPlant } from "./api.js";
+import React, { useEffect, useState } from "react";
+import Header from "./components/Header";
+import PlantGrid from "./components/PlantGrid";
+import Filters from "./components/Filters";
+import AddPlant from "./components/AddPlant";
+import { fetchPlants, loginUser, registerUser } from "./api";
 
-// App manages auth state via AuthProviderWrapper; AddPlant will be visible only to admin
-function AppInner() {
+export default function App() {
+  const [user, setUser] = useState(null); // { username, role, token }
   const [plants, setPlants] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [loading, setLoading] = useState(false);
-  const [meta, setMeta] = useState({ total: 0 });
+  const [error, setError] = useState("");
 
-  const load = async () => {
+  // Auth helpers (no localStorage; token stays in memory)
+  const handleLogin = async (username, password) => {
+    setError("");
     try {
-      setLoading(true);
-      const data = await fetchPlants({ q: search, cat: category });
-      // API returns { items, total, page, pages } or array depending on implementation; handle both
-      if (Array.isArray(data)) {
-        setPlants(data);
-        setMeta({ total: data.length });
-      } else {
-        setPlants(data.items || []);
-        setMeta({ total: data.total || (data.items || []).length });
+      const res = await loginUser(username, password);
+      if (res.token) {
+        setUser({ username, role: res.role, token: res.token });
+        return { ok: true, role: res.role };
       }
-    } catch (err) {
-      console.error(err);
+      return { ok: false, message: res.message || "Login failed" };
+    } catch (e) {
+      return { ok: false, message: e.message || "Login failed" };
+    }
+  };
+
+  const handleRegister = async (username, password) => {
+    setError("");
+    try {
+      const res = await registerUser(username, password);
+      if (res && (res.message || res.success)) {
+        return { ok: true };
+      }
+      return { ok: false, message: res?.message || "Register failed" };
+    } catch (e) {
+      return { ok: false, message: e.message || "Register failed" };
+    }
+  };
+
+  const handleLogout = () => setUser(null);
+
+  const loadPlants = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await fetchPlants({ q: search, cat: category });
+      setPlants(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setError(e.message || "Failed to load plants");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    load();
-    // eslint-disable-next-line
+    loadPlants();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, category]);
-
-  const handleAdded = async (payload) => {
-    await addPlant(payload);
-    load();
-  };
 
   return (
     <div className="container">
-      <Header setSearch={setSearch} />
-      <Filters search={search} setSearch={setSearch} category={category} setCategory={setCategory} />
-      <div style={{ margin: '8px 0' }}><strong>{meta.total}</strong> results</div>
-      {loading ? <p>Loading…</p> : <PlantGrid plants={plants} />}
-      <AddPlant onAdded={handleAdded} />
-    </div>
-  );
-}
+      <Header
+        user={user}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+        onLogout={handleLogout}
+      />
 
-export default function App() {
-  return (
-    <AuthProvider>
-      <Router>
-        <AppInner />
-      </Router>
-    </AuthProvider>
+      <div className="content">
+        <Filters
+          search={search}
+          setSearch={setSearch}
+          category={category}
+          setCategory={setCategory}
+        />
+
+        {loading && <p className="info">Loading plants…</p>}
+        {error && <p className="error">{error}</p>}
+
+        <PlantGrid plants={plants} />
+
+        {user?.role === "admin" && (
+          <>
+            <h2 className="section-title">Add New Plant</h2>
+            <AddPlant token={user.token} onAdded={loadPlants} />
+          </>
+        )}
+      </div>
+    </div>
   );
 }

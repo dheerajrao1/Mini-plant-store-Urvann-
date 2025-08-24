@@ -1,19 +1,38 @@
-import React, { createContext, useState, useContext } from "react";
+// frontend/src/AuthProviderWrapper.jsx
+import { createContext, useContext, useState } from "react";
+import { loginUser, registerUser } from "../api";
 
-const AuthContext = createContext();
+// const AuthContext = createContext();
+export const AuthContext = createContext(); 
+export function AuthProviderWrapper({ children }) {
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("auth")) || null
+  );
 
-export const useAuth = () => useContext(AuthContext);
-
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-
-  // simple login: username; if username === 'admin' -> admin
-  const login = (username) => {
-    const isAdmin = username && username.toLowerCase() === "admin";
-    setUser({ username, isAdmin });
+  const login = async (username, password) => {
+    const data = await loginUser(username, password);
+    if (data.token) {
+      const authData = { username, role: data.role, token: data.token };
+      setUser(authData);
+      localStorage.setItem("auth", JSON.stringify(authData));
+    }
+    return data;
   };
 
-  const logout = () => setUser(null);
+  const register = async (username, password) => {
+    return await registerUser(username, password);
+  };
 
-  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("auth");
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
+
+export const useAuth = () => useContext(AuthContext);

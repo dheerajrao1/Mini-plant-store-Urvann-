@@ -1,51 +1,55 @@
 import express from 'express';
 import Plant from '../models/Plant.js';
+import { requireAuth, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// GET /api/plants
-// Query params:
-//  q - search name or category keyword (case-insensitive, substring)
-//  cat - filter by exact category (optional)
-//  page, limit (optional)
+// GET /api/plants?q=&cat=Category
 router.get('/', async (req, res) => {
   try {
-    const { q, cat, page = 1, limit = 50 } = req.query;
-    const filters = {};
+    const { q, cat } = req.query;
+    const query = {};
 
-    if (q) {
-      // search name OR categories elements matching keyword
-      const regex = { $regex: q, $options: 'i' };
-      filters.$or = [{ name: regex }, { categories: regex }];
+    if (q && q.trim()) {
+      const kw = q.trim();
+      // search by name or by category keyword (case-insensitive)
+      query.$or = [
+        { name: { $regex: kw, $options: 'i' } },
+        { categories: { $elemMatch: { $regex: kw, $options: 'i' } } }
+      ];
     }
 
     if (cat && cat !== 'All') {
-      filters.categories = cat;
+      query.categories = { $in: [cat] };
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
-    const [items, total] = await Promise.all([
-      Plant.find(filters).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
-      Plant.countDocuments(filters)
-    ]);
-
-    res.json({ items, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
+    const plants = await Plant.find(query).sort({ createdAt: -1 });
+    res.json(plants);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ message: 'Failed to fetch plants', error: err.message });
   }
 });
 
-// POST /api/plants
-router.post('/', async (req, res) => {
+// POST /api/plants  (admin only)
+router.post('/', requireAuth, adminOnly, async (req, res) => {
   try {
-    const { name, price, categories = [], available = true, image = '' } = req.body;
-    if (!name || price == null) return res.status(400).json({ error: 'Name and price required' });
-    const plant = await Plant.create({ name: name.trim(), price: Number(price), categories, available, image });
-    res.status(201).json(plant);
+    const { name, price, categories, availability } = req.body || {};
+    if (!name || price == null) {
+      return res.status(400).json({ message: 'Name and price are required' });
+    }
+    const cats = Array.isArray(categories)
+      ? categories
+      : (typeof categories === 'string' ? categories.split(',').map(s => s.trim()).filter(Boolean) : []);
+
+    const created = await Plant.create({
+      name: name.trim(),
+      price: Number(price),
+      categories: cats,
+      availability: Boolean(availability)
+    });
+    res.status(201).json(created);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ message: 'Failed to add plant', error: err.message });
   }
 });
 

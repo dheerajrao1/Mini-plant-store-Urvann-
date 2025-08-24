@@ -1,35 +1,71 @@
 import React, { useState } from "react";
-import { useAuth } from "./AuthProviderWrapper";
+import { addPlant } from "../api";
 
+export default function AddPlant({ token, onAdded }) {
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [categories, setCategories] = useState(""); // comma-separated
+  const [availability, setAvailability] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
 
-export default function AddPlant({ onAdded }) {
-  const { user } = useAuth();
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [cats, setCats] = useState('');
-  const [available, setAvailable] = useState(true);
-
-  if (!user?.isAdmin) {
-    return <div style={{ padding: 16 }}>Add Plant (admin only). Login as admin to add.</div>;
-  }
-
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    const payload = { name, price: Number(price), categories: cats.split(',').map(s=>s.trim()), available };
-    await onAdded?.(payload);
-    setName(''); setPrice(''); setCats(''); setAvailable(true);
+    setBusy(true);
+    setMsg("");
+    try {
+      const payload = {
+        name,
+        price: Number(price),
+        categories: categories.split(",").map((s) => s.trim()).filter(Boolean),
+        availability,
+      };
+      await addPlant(payload, token);
+      setMsg("✅ Plant added");
+      setName("");
+      setPrice("");
+      setCategories("");
+      setAvailability(true);
+      onAdded && onAdded();
+    } catch (err) {
+      setMsg(`❌ ${err.message || "Failed to add plant"}`);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="add-plant-form">
-      <h3>Add Plant</h3>
-      <input value={name} onChange={(e)=>setName(e.target.value)} placeholder="Name" required/>
-      <input type="number" value={price} onChange={(e)=>setPrice(e.target.value)} placeholder="Price" required/>
-      <input value={cats} onChange={(e)=>setCats(e.target.value)} placeholder="Categories (comma separated)" required/>
-      <label>
-        <input type="checkbox" checked={available} onChange={(e)=>setAvailable(e.target.checked)} /> Available
-      </label>
-      <button type="submit">Add Plant</button>
+    <form className="add-plant-form" onSubmit={submit}>
+      <h2>Add Plant (Admin)</h2>
+      <input
+        placeholder="Plant name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
+      <input
+        placeholder="Price (₹)"
+        type="number"
+        min="0"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+        required
+      />
+      <input
+        placeholder="Categories (comma separated)"
+        value={categories}
+        onChange={(e) => setCategories(e.target.value)}
+      />
+      <select
+        value={availability ? "yes" : "no"}
+        onChange={(e) => setAvailability(e.target.value === "yes")}
+      >
+        <option value="yes">Available</option>
+        <option value="no">Unavailable</option>
+      </select>
+
+      {msg && <p className="info">{msg}</p>}
+      <button type="submit" disabled={busy}>{busy ? "Saving…" : "Add Plant"}</button>
     </form>
   );
 }

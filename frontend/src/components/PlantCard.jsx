@@ -1,20 +1,17 @@
 import React from "react";
 
-const PlantCard = ({ plant }) => {
+export default function PlantCard({ plant }) {
   return (
     <div className="plant-card">
+      <div className="thumb">🌱</div>
       <h3>{plant.name}</h3>
-      <p>
-        <strong>Price:</strong> ₹{plant.price}
+      <p className="price">₹{Number(plant.price).toFixed(2)}</p>
+      <p className="categories">
+        {Array.isArray(plant.categories) ? plant.categories.join(", ") : ""}
       </p>
-      <p>
-        <strong>Categories:</strong> {plant.categories.join(", ")}
-      </p>
-      <p>
-        <strong>Stock:</strong> {plant.stock ? "Yes" : "No"}
-      </p>
+      <span className={`stock ${plant.availability ? "available" : "unavailable"}`}>
+        {plant.availability ? "In Stock" : "Out of Stock"}
+      </span>
     </div>
   );
-};
-
-export default PlantCard;
+}

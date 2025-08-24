@@ -1,37 +1,70 @@
-import React, { useState } from "react";
-import { AuthContext } from "./AuthContext";
+// frontend/src/components/Login.jsx
+import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "./AuthProviderWrapper";
 
-
-const Login = () => {
+export default function Login() {
+  const [form, setForm] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
   const { login } = useContext(AuthContext);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login(email, password);
+
+    try {
+      const loggedInUser = await login(form.username, form.password);
+
+      if (loggedInUser.role === "admin") {
+        navigate("/add-plant");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      setError("Invalid username or password");
+    }
   };
 
   return (
-    <div className="form-container">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="flex justify-center items-center h-screen">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-lg rounded-2xl p-8 w-96"
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
         <input
-          type="email"
-          placeholder="Enter Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={form.username}
+          onChange={handleChange}
+          className="w-full p-2 border rounded mb-4"
+          required
         />
         <input
           type="password"
-          placeholder="Enter Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          name="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+          className="w-full p-2 border rounded mb-4"
+          required
         />
-        <button type="submit">Login</button>
+
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+        >
+          Login
+        </button>
       </form>
     </div>
   );
-};
-
-export default Login;
+}
