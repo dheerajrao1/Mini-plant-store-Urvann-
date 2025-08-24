@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import AddPlant from "./AddPlant";
 
 export default function Header({ user, onLogin, onRegister, onLogout }) {
   const [mode, setMode] = useState("login"); // 'login' | 'register'
@@ -7,6 +8,7 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [showAddPlant, setShowAddPlant] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -32,7 +34,7 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
 
   return (
     <header className="header">
-      <h1 className="logo">🌿 Plant Catalog</h1>
+      <h1 className="logo">🌿 Mini Plant Store</h1>
 
       {!user ? (
         <div className="auth-actions">
@@ -43,6 +45,11 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
       ) : (
         <div className="auth-actions">
           <span className="welcome">Hi, {user.username} ({user.role})</span>
+          {user.role === "admin" && (
+            <button className="btn" onClick={() => setShowAddPlant(!showAddPlant)}>
+              Add Plant
+            </button>
+          )}
           <button className="btn btn-danger" onClick={onLogout}>Logout</button>
         </div>
       )}
@@ -80,19 +87,18 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
 
               <p className="hint">
                 {mode === "login" ? (
-                  <>No account? <button type="button" className="link" onClick={() => setMode("register")}>Signup</button></>
+                  <>No account? <button type="button" className="signup-button-link" onClick={() => setMode("register")}>Signup</button></>
                 ) : (
-                  <>Already registered? <button type="button" className="link" onClick={() => setMode("login")}>Login</button></>
+                  <>Already registered? <button type="button" className="signup-button-link" onClick={() => setMode("login")}>Login</button></>
                 )}
-              </p>
-
-              <p className="hint">
-                <strong>Admin demo:</strong> username <code>admin</code>, password <code>admin123</code>
               </p>
             </form>
           </div>
         </div>
       )}
+
+      {/* Add Plant Form for Admin */}
+      {showAddPlant && user?.role === "admin" && <AddPlant />}
     </header>
   );
 }

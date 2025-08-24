@@ -41,3 +41,96 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; background:var(
 .error { color:#b00020; }
 .small { font-size: 0.9rem; }
 .thumb { width:100%; height:120px; background:#eaf6ee; display:flex; align-items:center; justify-content:center; border-radius:10px; margin-bottom:8px; font-size:2rem; }
+.plant-card {
+  background: var(--card);
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+  cursor: pointer;
+}
+
+.plant-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(2,6,23,0.15);
+  border: 1px solid var(--accent);
+}
+
+/* Optional: smooth fade-in effect for cards when they appear */
+.plant-card {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.5s forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Keep responsiveness */
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 10px;
+}
+/* Button hover animation */
+.add-plant-form button,
+.btn,
+.btn-danger,
+.link {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.add-plant-form button:hover,
+.btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-danger:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.link:hover {
+  text-decoration: underline;
+  transform: translateY(-2px);
+}
+
+/* Optional: subtle fade-in for buttons */
+.add-plant-form button,
+.btn,
+.btn-danger {
+  opacity: 0;
+  animation: fadeInUp 0.4s forwards;
+  animation-delay: 0.2s;
+}
+
+/* Keep your existing fadeInUp */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Styled button for signup/login toggle */
+.signup-button-link {
+  background-color: var(--accent); /* green accent */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.signup-button-link:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
