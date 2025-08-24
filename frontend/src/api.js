@@ -1,4 +1,6 @@
-const BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000/api";
+const BASE =
+  import.meta.env.VITE_API_BASE ||
+  "https://mini-plant-store-urvann-bayuwc0wq-dheeraj-raos-projects.vercel.app/api";
 
 // ---------- Auth ----------
 export async function loginUser(username, password) {
