@@ -1,14 +1,12 @@
 import React, { useState } from "react";
-import AddPlant from "./AddPlant";
 
-export default function Header({ user, onLogin, onRegister, onLogout }) {
+export default function Header({ user, onLogin, onRegister, onLogout, toggleAddPlant }) {
   const [mode, setMode] = useState("login"); // 'login' | 'register'
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
-  const [showAddPlant, setShowAddPlant] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -46,15 +44,13 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
         <div className="auth-actions">
           <span className="welcome">Hi, {user.username} ({user.role})</span>
           {user.role === "admin" && (
-            <button className="btn" onClick={() => setShowAddPlant(!showAddPlant)}>
-              Add Plant
-            </button>
+            <button className="btn" onClick={toggleAddPlant}>Add Plant</button>
           )}
           <button className="btn btn-danger" onClick={onLogout}>Logout</button>
         </div>
       )}
 
-      {/* Simple modal */}
+      {/* Modal for Login/Signup */}
       {open && (
         <div className="modal">
           <div className="modal-card">
@@ -78,9 +74,7 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-
               {msg && <p className="error small">{msg}</p>}
-
               <button className="btn" disabled={busy} type="submit">
                 {busy ? "Please wait…" : mode === "login" ? "Login" : "Signup"}
               </button>
@@ -96,9 +90,6 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
           </div>
         </div>
       )}
-
-      {/* Add Plant Form for Admin */}
-      {showAddPlant && user?.role === "admin" && <AddPlant />}
     </header>
   );
 }

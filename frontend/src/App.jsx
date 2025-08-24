@@ -12,10 +12,10 @@ export default function App() {
   const [category, setCategory] = useState("All");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showAddPlant, setShowAddPlant] = useState(false); // toggle AddPlant form
 
-  // Auth helpers (no localStorage; token stays in memory)
+  // Auth helpers
   const handleLogin = async (username, password) => {
-    setError("");
     try {
       const res = await loginUser(username, password);
       if (res.token) {
@@ -29,19 +29,19 @@ export default function App() {
   };
 
   const handleRegister = async (username, password) => {
-    setError("");
     try {
       const res = await registerUser(username, password);
-      if (res && (res.message || res.success)) {
-        return { ok: true };
-      }
+      if (res && (res.message || res.success)) return { ok: true };
       return { ok: false, message: res?.message || "Register failed" };
     } catch (e) {
       return { ok: false, message: e.message || "Register failed" };
     }
   };
 
-  const handleLogout = () => setUser(null);
+  const handleLogout = () => {
+    setUser(null);
+    setShowAddPlant(false); // hide AddPlant form on logout
+  };
 
   const loadPlants = async () => {
     setLoading(true);
@@ -58,7 +58,6 @@ export default function App() {
 
   useEffect(() => {
     loadPlants();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, category]);
 
   return (
@@ -68,6 +67,7 @@ export default function App() {
         onLogin={handleLogin}
         onRegister={handleRegister}
         onLogout={handleLogout}
+        toggleAddPlant={() => setShowAddPlant((prev) => !prev)}
       />
 
       <div className="content">
@@ -81,14 +81,15 @@ export default function App() {
         {loading && <p className="info">Loading plants…</p>}
         {error && <p className="error">{error}</p>}
 
-        <PlantGrid plants={plants} />
-
-        {user?.role === "admin" && (
+        {/* AddPlant form shown above the grid */}
+        {user?.role === "admin" && showAddPlant && (
           <>
             <h2 className="section-title">Add New Plant</h2>
             <AddPlant token={user.token} onAdded={loadPlants} />
           </>
         )}
+
+        <PlantGrid plants={plants} />
       </div>
     </div>
   );
