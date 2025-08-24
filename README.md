@@ -151,5 +151,3 @@ Use these credentials to access admin features like adding new plants.
 * Plants include realistic names, prices, and categories.
 * Focused on scalability, clean code, and smooth user experience.
 * API responses optimized for fast performance.
-
-Do you want me to make that?
