@@ -19,6 +19,13 @@ app.get('/', (req, res) => res.json({ status: 'ok', service: 'plant-catalog-api'
 // routes
 app.use('/api/auth', authRoutes);
 app.use('/api/plants', plantRoutes);
-
 const PORT = process.env.PORT || 5000;
-module.exports = app;
+
+// Only listen locally (not on Vercel)
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+// Export app for Vercel
+export default app;
+
